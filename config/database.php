@@ -15,10 +15,8 @@ class Database {
     private $error;
 
     public function __construct() {
-        // Load environment variables from .env file
-        if (file_exists(__DIR__ . '/../.env')) {
-            $envVars = parse_ini_file(__DIR__ . '/../.env');
-        }
+        // Include environment configuration
+        require_once __DIR__ . '/env.php';
 
         // Set database connection parameters from environment variables
         $this->host = $_ENV['DB_HOST'] ?? $envVars['DB_HOST'] ?? 'localhost';
