@@ -5,6 +5,10 @@
  * File: config/auth.php
  */
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
@@ -47,29 +51,43 @@ class OTPAuth {
     }
     
     /**
-     * Send OTP via email (you'll need to implement actual email sending)
-     */
-    private function sendOTPEmail($email, $username, $otp) {
-        // For demonstration - in production, use PHPMailer, SendGrid, or similar
-        $subject = "Code de vérification - Pharmacie";
-        $message = "
-        Bonjour $username,
+     * Send OTP via email (you'll need to implement actual email sending)*/
+        private function sendOTPEmail($email, $username, $otp) {
+            require_once __DIR__ . '/../vendor/autoload.php';
+            
+            $mail = new PHPMailer(true);
         
-        Votre code de vérification est: $otp
-        
-        Ce code expire dans 5 minutes.
-        
-        Si vous n'avez pas demandé ce code, ignorez cet email.
-        
-        Cordialement,
-        L'équipe Pharmacie
-        ";
-        
-        $headers = "From: noreply@pharmacie.com\r\n";
-        $headers .= "Reply-To: noreply@pharmacie.com\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-        
-        return mail($email, $subject, $message, $headers);
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';  // Replace with your SMTP host
+            $mail->SMTPAuth = true;
+            $mail->Username = 'your-email@gmail.com'; // Replace with your email
+            $mail->Password = 'your-app-password';    // Replace with your app password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+            
+            // Recipients
+            $mail->setFrom('your-email@gmail.com', 'Pharmacie');
+            $mail->addAddress($email, $username);
+            
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Code de vérification - Pharmacie';
+            $mail->Body = "
+                <h2>Bonjour $username,</h2>
+                <p>Votre code de vérification est: <strong>$otp</strong></p>
+                <p>Ce code expire dans 5 minutes.</p>
+                <p>Si vous n'avez pas demandé ce code, ignorez cet email.</p>
+                <br>
+                <p>Cordialement,<br>L'équipe Pharmacie</p>
+            ";
+            
+            return $mail->send();
+        } catch (Exception $e) {
+            error_log("Email sending failed: {$mail->ErrorInfo}");
+            return false;
+        }
     }
     
     /**
