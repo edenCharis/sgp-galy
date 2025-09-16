@@ -1,0 +1,61 @@
+# .htaccess - URL Rewriting pour supprimer les extensions
+# Placez ce fichier dans le répertoire racine de votre site
+
+# Activer le module de réécriture
+RewriteEngine On
+
+# Supprimer les extensions .php et .html des URLs
+# Rediriger les URLs avec extensions vers les URLs propres
+RewriteCond %{THE_REQUEST} /([^.]+)\.(php|html)(\?[^ ]*)?\s [NC]
+RewriteRule ^ /%1%3? [R=301,L]
+
+# Servir les fichiers .php pour les URLs sans extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^.]+)$ $1.php [L]
+
+# Servir les fichiers .html pour les URLs sans extension (si pas de .php trouvé)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^.]+)$ $1.html [L]
+
+# Optionnel: Supprimer index.php/index.html de l'URL
+RewriteRule ^index\.(php|html)$ / [R=301,L]
+
+# Optionnel: Forcer HTTPS (recommandé)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Optionnel: Forcer www ou non-www
+# Forcer www:
+# RewriteCond %{HTTP_HOST} !^www\. [NC]
+# RewriteRule ^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Forcer sans www:
+# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+# RewriteRule ^(.*)$ https://%1%{REQUEST_URI} [L,R=301]
+
+# Sécurité: Empêcher l'accès aux fichiers sensibles
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Améliorer les performances avec la mise en cache
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+</IfModule>

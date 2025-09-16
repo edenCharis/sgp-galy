@@ -17,14 +17,14 @@ class Database {
     public function __construct() {
         // Include environment configuration
         require_once __DIR__ . '/env.php';
-
-        // Set database connection parameters from environment variables
-        $this->host = $_ENV['DB_HOST'] ?? $envVars['DB_HOST'] ?? 'localhost';
-        $this->db_name = $_ENV['DB_NAME'] ?? $envVars['DB_NAME'] ?? 'pharmApp';
-        $this->username = $_ENV['DB_USERNAME'] ?? $envVars['DB_USERNAME'] ?? 'root';
-        $this->password = $_ENV['DB_PASSWORD'] ?? $envVars['DB_PASSWORD'] ?? '';
-        $this->port = $_ENV['DB_PORT'] ?? $envVars['DB_PORT'] ?? '3306';
-        $this->charset = $_ENV['DB_CHARSET'] ?? $envVars['DB_CHARSET'] ?? 'utf8mb4';
+        
+        // Set database connection parameters from env.php
+        $this->host = DB_HOST;
+        $this->db_name = DB_NAME;
+        $this->username = DB_USER;
+        $this->password = DB_PASS;
+        $this->port = DB_PORT;
+        $this->charset = DB_CHARSET;
     }
 
     /**
