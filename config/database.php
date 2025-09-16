@@ -14,14 +14,19 @@ class Database {
     private $pdo;
     private $error;
 
-    public function __construct($config = []) {
-        // Default configuration - modify these values
-        $this->host = $config['host'] ?? 'localhost';
-        $this->db_name = $config['db_name'] ?? 'pharmApp';
-        $this->username = $config['username'] ?? 'root';
-        $this->password = $config['password'] ?? '';
-        $this->port = $config['port'] ?? '3306';
-        $this->charset = $config['charset'] ?? 'utf8mb4';
+    public function __construct() {
+        // Load environment variables from .env file
+        if (file_exists(__DIR__ . '/../.env')) {
+            $envVars = parse_ini_file(__DIR__ . '/../.env');
+        }
+
+        // Set database connection parameters from environment variables
+        $this->host = $_ENV['DB_HOST'] ?? $envVars['DB_HOST'] ?? 'localhost';
+        $this->db_name = $_ENV['DB_NAME'] ?? $envVars['DB_NAME'] ?? 'pharmApp';
+        $this->username = $_ENV['DB_USERNAME'] ?? $envVars['DB_USERNAME'] ?? 'root';
+        $this->password = $_ENV['DB_PASSWORD'] ?? $envVars['DB_PASSWORD'] ?? '';
+        $this->port = $_ENV['DB_PORT'] ?? $envVars['DB_PORT'] ?? '3306';
+        $this->charset = $_ENV['DB_CHARSET'] ?? $envVars['DB_CHARSET'] ?? 'utf8mb4';
     }
 
     /**
