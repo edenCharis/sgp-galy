@@ -14,11 +14,13 @@ include 'database.php';
             $password = $_POST['password'];
             
            
-            $query = "SELECT *, role FROM user WHERE username = :username AND password = :password";
+            $query = "SELECT *, role FROM user WHERE username = :username";
             $user = $db->fetch($query, ['username' => $username, 'password' => $password]);
+
+
             
            
-            if ($user) {
+            if ($user && password_verify($password, $user['password'])) {
                 
 
                 
@@ -51,6 +53,12 @@ include 'database.php';
                     $_SESSION['role'] = $user['role'];
                     $_SESSION['id'] = session_id();
                     header('Location: ./../admin/index.php');
+                }else if ($user['role'] === 'STOCK-MANAGER') {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['id'] = session_id();
+                    header('Location: ./../stock-manager/index.php');
                 }
                 
                 else{

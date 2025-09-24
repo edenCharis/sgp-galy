@@ -101,8 +101,7 @@ class OTPAuth {
             return ['success' => false, 'message' => 'Nom d\'utilisateur incorrect'];
         }
         
-        // Verify password (direct comparison since password is not hashed)
-        if ($password !== $user['password']) {
+         if ( !password_verify($password, $user['password']) AND in_array($user['role'] , ["STOCK-MANAGER"]  )) {
             return ['success' => false, 'message' => 'Mot de passe incorrect'];
         }
         
@@ -246,6 +245,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     case 'ADMIN':
                         $redirectUrl = 'admin/index.php';
+                        break;
+                    case 'STOCK-MANAGER':
+                        $redirectUrl = 'stock-manager/index.php';
                         break;
                     default:
                         $redirectUrl = '../';

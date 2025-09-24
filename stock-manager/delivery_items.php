@@ -1,6 +1,6 @@
 <?php
 session_start();
-if($_SESSION["role"] !== "ADMIN" || $_SESSION["id"] !== session_id()){
+if($_SESSION["role"] !== "STOCK-MANAGER" || $_SESSION["id"] !== session_id()){
     header("Location: ../logout.php");
     exit();
 }
@@ -20,7 +20,7 @@ try {
     // Get delivery ID from URL
     $deliveryId = $_GET['id'] ?? '';
     if (empty($deliveryId)) {
-        header("Location: stock-deliveries.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -34,7 +34,7 @@ $stmt->execute([$deliveryId]);
 $delivery = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (empty($delivery)) {
-    header("Location: stock-deliveries.php");
+    header("Location: index.php");
     exit();     
 }
 
@@ -273,7 +273,7 @@ if (empty($delivery)) {
     $delivery = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$delivery) {
-        header("Location: stock-deliveries.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -722,7 +722,7 @@ function getStatusBadge($status) {
                 <div style="max-width: 1600px; margin: 0 auto; padding: 2rem;">
                     <!-- Breadcrumb -->
                     <div style="margin-bottom: 1rem;">
-                        <a href="stock-deliveries.php" style="color: #667eea; text-decoration: none;">← Retour aux livraisons</a>
+                        <a href="index.php" style="color: #667eea; text-decoration: none;">← Retour aux livraisons</a>
                     </div>
 
                     <!-- Delivery Header -->

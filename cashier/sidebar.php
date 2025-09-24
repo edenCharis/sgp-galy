@@ -1,3 +1,11 @@
+
+<?php
+
+require_once '../config/app_settings.php';
+AppSettings::init($db);
+
+?>
+
 <!-- Cashier Sidebar Component -->
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 <aside id="sidebar" class="sidebar">
@@ -5,10 +13,10 @@
         <div class="flex items-center justify-between">
             <a href="/" class="sidebar-brand">
                 <div class="brand-logo">
-                    <i data-lucide="cross"></i>
+                    <?php echo getAppIcon('w-6 h-6');?>
                 </div>
                 <div>
-                    <div class="brand-text">PharmaSys</div>
+                    <div class="brand-text"><?php echo appName()?></div>
                     <div class="brand-subtitle">Caisse</div>
                 </div>
             </a>

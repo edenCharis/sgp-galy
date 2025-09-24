@@ -1,15 +1,25 @@
 <!-- Sidebar Component -->
+
+
+
+<?php
+
+require_once '../config/app_settings.php';
+AppSettings::init($db);
+
+?>
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 <aside id="sidebar" class="sidebar">
     <div class="sidebar-header">
         <div class="flex items-center justify-between">
             <a href="/" class="sidebar-brand">
                 <div class="brand-logo">
-                    <i data-lucide="cross"></i>
+                   
+                    <?php  echo getAppIcon('icon-class')?>
                 </div>
                 <div>
-                    <div class="brand-text">PharmaSys</div>
-                    <div class="brand-subtitle">Gestion Pharmacie</div>
+                    <div class="icon-class'brand-text"><?php echo appName()?></div>
+                   
                 </div>
             </a>
             <button id="sidebarClose" class="sidebar-close">

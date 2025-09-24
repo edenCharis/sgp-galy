@@ -1,25 +1,25 @@
 <!-- Admin Sidebar Component -->
+
+
 <?php
 
 require_once '../config/app_settings.php';
 AppSettings::init($db);
 
 ?>
-
-
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 <aside id="sidebar" class="sidebar">
     <div class="sidebar-header">
         <div class="flex items-center justify-between">
             <a href="/" class="sidebar-brand">
                 <div class="brand-logo">
-                 
-                  <?php echo getAppIcon('icon-class'); ?>
+                   
 
+                    <?php echo getAppIcon('icon-class'); ?>
                 </div>
                 <div>
-                    <div class="brand-text"><?php echo appName() ?></div>
-                    <div class="brand-subtitle"><?php echo $_SESSION["role"]?></div>
+                    <div class="brand-text"><?php echo appName()?></div>
+                    <div class="brand-subtitle"><?php echo $_SESSION['role'];?></div>
                 </div>
             </a>
             <button id="sidebarClose" class="sidebar-close">
@@ -37,38 +37,7 @@ AppSettings::init($db);
         <!-- Main Navigation -->
         <div class="sidebar-group">
             <div class="sidebar-menu">
-                <div class="sidebar-menu-item">
-                    <a href="index.php" class="sidebar-menu-link active" data-page="dashboard">
-                        <i data-lucide="home" class="menu-icon"></i>
-                        <div class="menu-content">
-                            <div class="menu-title">Tableau de bord</div>
-                            <div class="menu-description">Vue d'ensemble</div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- NEW: Cash Register Management -->
-                <div class="sidebar-menu-item">
-                    <a href="cash-register.php" class="sidebar-menu-link" data-page="cash-register">
-                        <i data-lucide="calculator" class="menu-icon"></i>
-                        <div class="menu-content">
-                            <div class="menu-title">Gestion Caisses</div>
-                           
-                        </div>
-                       
-                    </a>
-                </div>
-                
-                <div class="sidebar-menu-item">
-                    <a href="users.php" class="sidebar-menu-link" data-page="users">
-                        <i data-lucide="users" class="menu-icon"></i>
-                        <div class="menu-content">
-                            <div class="menu-title">Utilisateurs</div>
-                            <div class="menu-description">Gestion utilisateurs</div>    
-                        </div>
-                      
-                    </a>
-                </div>
+             
 
                 <div class="sidebar-menu-item">
                     <a href="suppliers.php" class="sidebar-menu-link" data-page="suppliers">
@@ -91,7 +60,7 @@ AppSettings::init($db);
                 </div>
 
                 <div class="sidebar-menu-item">
-                    <a href="stock-deliveries.php" class="sidebar-menu-link" data-page="deliveries">
+                    <a href="index.php" class="sidebar-menu-link" data-page="deliveries">
                         <i data-lucide="package-open" class="menu-icon"></i>
                         <div class="menu-content">
                             <div class="menu-title">Livraisons</div>
@@ -99,16 +68,6 @@ AppSettings::init($db);
                         </div>
                         <div class="menu-badge success">Stock</div>
                     </a>
-                </div>
-
-                <div class="sidebar-menu-item">
-                    <a href="logs.php" class="sidebar-menu-link" data-page="logs">
-                        <i data-lucide="file-text" class="menu-icon"></i>
-                        <div class="menu-content">
-                            <div class="menu-title">Logs</div>
-                            <div class="menu-description">Activité système</div>        
-                        </div>
-                    </a>    
                 </div>
             </div>
         </div>

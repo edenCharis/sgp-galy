@@ -1,6 +1,8 @@
+
+
 <?php
 session_start();
-if($_SESSION["role"] === "ADMIN" && $_SESSION["id"] == session_id()){
+if($_SESSION["role"] === "STOCK-MANAGER" && $_SESSION["id"] == session_id()){
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);

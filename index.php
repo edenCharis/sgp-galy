@@ -1,3 +1,13 @@
+
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
+
+
+
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -567,7 +577,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('Request error:', error);
-                return { success: false, message: 'Erreur de connexion au serveur' };
+                return { success: false, message: 'Erreur de connexion au serveur'+error };
             }
         }
 

@@ -1,4 +1,12 @@
 
+
+
+<?php
+
+require_once '../config/app_settings.php';
+AppSettings::init($db);
+
+?>
 <header class="header">
     <div class="header-content">
         <!-- Left Section -->
@@ -9,11 +17,13 @@
             
             <div class="logo-section">
                 <div class="logo">
-                    <i data-lucide="cross"></i>
+                  
+                    <?php echo getAppIcon('icon-class'); ?>
+
                 </div>
                 <div class="page-info">
-                    <h1 id="pageTitle">Tableau de bord</h1>
-                    <p id="pageDescription">Vue d'ensemble de votre pharmacie</p>
+                    <h1 id="pageTitle"><?php echo appName()?></h1>
+                    <p id="pageDescription">VENDEUR</p>
                 </div>
             </div>
         </div>
