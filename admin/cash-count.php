@@ -79,6 +79,7 @@ try {
                 '1000' => intval($_POST['count_1000'] ?? 0),
                 '500' => intval($_POST['count_500'] ?? 0),
                 '250' => intval($_POST['count_250'] ?? 0),
+                '200' => intval($_POST['count_200'] ?? 0),
                 '100' => intval($_POST['count_100'] ?? 0),
                 '50' => intval($_POST['count_50'] ?? 0),
                 '25' => intval($_POST['count_25'] ?? 0),
@@ -121,7 +122,7 @@ try {
                 if ($existingCount) {
                     $updateSQL = "UPDATE cash_counting SET 
                                     count_10000 = ?, count_5000 = ?, count_2000 = ?, count_1000 = ?,
-                                    count_500 = ?, count_250 = ?, count_100 = ?, count_50 = ?,
+                                    count_500 = ?, count_250 = ?,count_200=?, count_100 = ?, count_50 = ?,
                                     count_25 = ?, count_10 = ?, count_5 = ?, count_1 = ?,
                                     cards_amount = ?, checks_amount = ?, vouchers_amount = ?,
                                     cash_total = ?, physical_total = ?, expected_total = ?,
@@ -131,7 +132,7 @@ try {
                     
                     $db->execute($updateSQL, [
                         $denominations['10000'], $denominations['5000'], $denominations['2000'], $denominations['1000'],
-                        $denominations['500'], $denominations['250'], $denominations['100'], $denominations['50'],
+                        $denominations['500'], $denominations['250'],$denominations['200'],$denominations['100'], $denominations['50'],
                         $denominations['25'], $denominations['10'], $denominations['5'], $denominations['1'],
                         $cards_amount, $checks_amount, $vouchers_amount,
                         $cash_total, $physical_total, $expected_total,
@@ -141,7 +142,7 @@ try {
                 } else {
                     $insertSQL = "INSERT INTO cash_counting (
                                     register_id, count_10000, count_5000, count_2000, count_1000,
-                                    count_500, count_250, count_100, count_50, count_25, count_10, count_5, count_1,
+                                    count_500, count_250,count_200, count_100, count_50, count_25, count_10, count_5, count_1,
                                     cards_amount, checks_amount, vouchers_amount,
                                     cash_total, physical_total, expected_total, difference,
                                     justification, category, created_at, created_by
@@ -150,7 +151,7 @@ try {
                     $db->execute($insertSQL, [
                         $register_id,
                         $denominations['10000'], $denominations['5000'], $denominations['2000'], $denominations['1000'],
-                        $denominations['500'], $denominations['250'], $denominations['100'], $denominations['50'],
+                        $denominations['500'], $denominations['250'], $denominations['200'],$denominations['100'], $denominations['50'],
                         $denominations['25'], $denominations['10'], $denominations['5'], $denominations['1'],
                         $cards_amount, $checks_amount, $vouchers_amount,
                         $cash_total, $physical_total, $expected_total, $difference,
@@ -213,6 +214,7 @@ function formatDateTime($datetime) {
         .counting-container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 15px;
         }
         
         .register-header {
@@ -417,6 +419,20 @@ function formatDateTime($datetime) {
         @media (max-width: 768px) {
             .summary-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .counting-container {
+                padding: 0 10px;
+            }
+            
+            .register-header {
+                padding: 1rem;
+            }
+            
+            .register-info-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
             }
         }
         
@@ -604,42 +620,228 @@ function formatDateTime($datetime) {
         .auto-save-indicator.show {
             opacity: 1;
         }
+        
+        /* Fix for missing payment method inputs */
+        .payment-method-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        /* Fix for responsive design */
+        @media (max-width: 576px) {
+            .denomination-item {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .count-input-group {
+                justify-content: center;
+            }
+            
+            .subtotal {
+                text-align: center;
+            }
+        }
+
+
+        .denominations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.bills-section,
+.coins-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.bills-grid,
+.coins-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.denomination-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.denomination-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.denomination-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.denomination-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+}
+
+.bill { 
+    background: linear-gradient(135deg, #10b981, #059669); 
+}
+
+.coin { 
+    background: linear-gradient(135deg, #f59e0b, #d97706); 
+}
+
+.denomination-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.denomination-value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.denomination-type {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.count-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.count-input {
+    width: 80px;
+    text-align: center;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-weight: 500;
+}
+
+.count-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.count-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.count-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.subtotal {
+    font-weight: 600;
+    color: #059669;
+    min-width: 100px;
+    text-align: right;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .denominations-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .denomination-item {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .count-input-group {
+        justify-content: center;
+    }
+    
+    .subtotal {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .denomination-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .denomination-details {
+        text-align: center;
+    }
+}
     </style>
 </head>
 <body>
     <div class="app-layout">
-     
         <div id="sidebarOverlay" class="sidebar-overlay"></div>
         <?php include 'sidebar.php'; ?>
 
-       
         <div class="main-content">
-        
             <?php include 'header.php'; ?>
             
-           
             <main class="content-area">
                 <div class="counting-container">
-                 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1 class="h3 mb-0 text-gray-800 d-flex align-items-center gap-2">
                             <i data-lucide="calculator"></i>
-                           
+                            Comptage de Caisse
                         </h1>
                         <a href="cash-register.php" class="btn-secondary">
                             <i data-lucide="arrow-left"></i>
-                          
+                            Retour aux Caisses
                         </a>
                     </div>
 
                     <?php if ($message): ?>
-                        <div class="alert alert-<?php echo $messageType; ?>" id="alertMessage">
+                        <div class="alert alert-<?php echo $messageType === 'success' ? 'success' : 'error'; ?>" id="alertMessage">
                             <i data-lucide="<?php echo $messageType === 'success' ? 'check-circle' : 'alert-circle'; ?>"></i>
                             <?php echo htmlspecialchars($message); ?>
                         </div>
                     <?php endif; ?>
 
-                    
                     <div class="register-header">
                         <h2 class="mb-0 d-flex align-items-center gap-2">
                             <i data-lucide="wallet"></i>
@@ -669,103 +871,116 @@ function formatDateTime($datetime) {
                         <input type="hidden" name="action" value="save_counting">
                         
                         <div class="summary-grid">
-                            
                             <div>
-                                
                                 <div class="counting-section">
                                     <h3 class="section-title">
                                         <i data-lucide="banknote"></i>
                                         Espèces - Billets et Pièces
                                     </h3>
-                                    <div class="denominations-grid">
-                                         Bills 
-                                        <?php
-                                        $bills = [
-                                            '10000' => 'Billets de 10 000',
-                                            '5000' => 'Billets de 5 000',  
-                                            '2000' => 'Billets de 2 000',
-                                            '1000' => 'Billets de 1 000',
-                                            '500' => 'Billets de 500'
-                                        ];
-                                        
-                                        foreach ($bills as $value => $label): 
-                                            $count = $existingCount ? intval($existingCount["count_$value"]) : 0;
-                                        ?>
-                                            <div class="denomination-item">
-                                                <div class="denomination-info">
-                                                    <div class="denomination-icon bill">
-                                                        <?php echo number_format($value, 0, '', ' '); ?>
-                                                    </div>
-                                                    <div class="denomination-details">
-                                                        <div class="denomination-value"><?php echo $label; ?></div>
-                                                        <div class="denomination-type">Billet</div>
-                                                    </div>
-                                                </div>
-                                                <div class="count-input-group">
-                                                    <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', -1)">
-                                                        <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
-                                                    </button>
-                                                    <input type="number" name="count_<?php echo $value; ?>" id="count_<?php echo $value; ?>" 
-                                                           class="count-input" min="0" value="<?php echo $count; ?>"
-                                                           onchange="calculateTotals()" oninput="calculateTotals()">
-                                                    <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', 1)">
-                                                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="subtotal" id="subtotal_<?php echo $value; ?>">
-                                                    <?php echo formatCurrency($count * intval($value)); ?>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
+                                  <div class="denominations-grid">
+    <div class="bills-section">
+        <h4 class="section-subtitle">
+            <i data-lucide="banknote"></i>
+            Billets
+        </h4>
+        <div class="bills-grid">
+            <?php
+            $bills = [
+                '10000' => 'Billets de 10 000',
+                '5000' => 'Billets de 5 000',  
+                '2000' => 'Billets de 2 000',
+                '1000' => 'Billets de 1 000',
+                '500' => 'Billets de 500'
+            ];
+            
+            foreach ($bills as $value => $label): 
+                $count = $existingCount ? intval($existingCount["count_$value"]) : 0;
+            ?>
+                <div class="denomination-item">
+                    <div class="denomination-info">
+                        <div class="denomination-icon bill">
+                            <?php echo number_format($value, 0, '', ' '); ?>
+                        </div>
+                        <div class="denomination-details">
+                            <div class="denomination-value"><?php echo $label; ?></div>
+                            <div class="denomination-type">Billet</div>
+                        </div>
+                    </div>
+                    <div class="count-input-group">
+                        <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', -1)">
+                            <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <input type="number" name="count_<?php echo $value; ?>" id="count_<?php echo $value; ?>" 
+                               class="count-input" min="0" value="<?php echo $count; ?>"
+                               onchange="calculateTotals()" oninput="calculateTotals()">
+                        <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', 1)">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="subtotal" id="subtotal_<?php echo $value; ?>">
+                        <?php echo formatCurrency($count * intval($value)); ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
 
-                                         Coins 
-                                        <?php
-                                        $coins = [
-                                            '250' => 'Pièces de 250',
-                                            '100' => 'Pièces de 100',
-                                            '50' => 'Pièces de 50',
-                                            '25' => 'Pièces de 25',
-                                            '10' => 'Pièces de 10',
-                                            '5' => 'Pièces de 5',
-                                            '1' => 'Pièces de 1'
-                                        ];
-                                        
-                                        foreach ($coins as $value => $label): 
-                                            $count = $existingCount ? intval($existingCount["count_$value"]) : 0;
-                                        ?>
-                                            <div class="denomination-item">
-                                                <div class="denomination-info">
-                                                    <div class="denomination-icon coin">
-                                                        <?php echo $value; ?>
-                                                    </div>
-                                                    <div class="denomination-details">
-                                                        <div class="denomination-value"><?php echo $label; ?></div>
-                                                        <div class="denomination-type">Pièce</div>
-                                                    </div>
-                                                </div>
-                                                <div class="count-input-group">
-                                                    <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', -1)">
-                                                        <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
-                                                    </button>
-                                                    <input type="number" name="count_<?php echo $value; ?>" id="count_<?php echo $value; ?>" 
-                                                           class="count-input" min="0" value="<?php echo $count; ?>"
-                                                           onchange="calculateTotals()" oninput="calculateTotals()">
-                                                    <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', 1)">
-                                                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="subtotal" id="subtotal_<?php echo $value; ?>">
-                                                    <?php echo formatCurrency($count * intval($value)); ?>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
+    <div class="coins-section">
+        <h4 class="section-subtitle">
+            <i data-lucide="circle"></i>
+            Pièces
+        </h4>
+        <div class="coins-grid">
+            <?php
+            $coins = [
+                '250' => 'Pièces de 250',
+                '200' => 'Pièces de 200',
+                '100' => 'Pièces de 100',
+                '50' => 'Pièces de 50',
+                '25' => 'Pièces de 25',
+                '10' => 'Pièces de 10',
+                '5' => 'Pièces de 5',
+                '1' => 'Pièces de 1'
+            ];
+            
+            foreach ($coins as $value => $label): 
+                $count = $existingCount ? intval($existingCount["count_$value"]) : 0;
+            ?>
+                <div class="denomination-item">
+                    <div class="denomination-info">
+                        <div class="denomination-icon coin">
+                            <?php echo $value; ?>
+                        </div>
+                        <div class="denomination-details">
+                            <div class="denomination-value"><?php echo $label; ?></div>
+                            <div class="denomination-type">Pièce</div>
+                        </div>
+                    </div>
+                    <div class="count-input-group">
+                        <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', -1)">
+                            <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <input type="number" name="count_<?php echo $value; ?>" id="count_<?php echo $value; ?>" 
+                               class="count-input" min="0" value="<?php echo $count; ?>"
+                               onchange="calculateTotals()" oninput="calculateTotals()">
+                        <button type="button" class="count-btn" onclick="adjustCount('count_<?php echo $value; ?>', 1)">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="subtotal" id="subtotal_<?php echo $value; ?>">
+                        <?php echo formatCurrency($count * intval($value)); ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
                                 </div>
 
-                             
+                                <!-- Payment Methods Section - FIXED: Added missing payment method inputs -->
+                               
                             </div>
 
-                              
                             <div>
                                 <div class="totals-display">
                                     <h3 class="section-title">
@@ -809,7 +1024,6 @@ function formatDateTime($datetime) {
                                     </div>
                                 </div>
 
-                               
                                 <div id="justification-section" class="justification-section" style="display: none;">
                                     <h4 class="mb-3">
                                         <i data-lucide="message-circle"></i>
@@ -819,12 +1033,12 @@ function formatDateTime($datetime) {
                                     <div class="form-group">
                                         <label class="form-label">Catégorie d'écart</label>
                                         <select name="category" class="form-control">
-                                            <option value="error_change">Erreur de rendu de monnaie</option>
-                                            <option value="error_input">Erreur de saisie</option>
-                                            <option value="theft">Vol/Perte</option>
-                                            <option value="damage">Dégradation billet/pièce</option>
-                                            <option value="bank_error">Erreur bancaire</option>
-                                            <option value="other">Autre</option>
+                                            <option value="error_change" <?php echo ($existingCount && $existingCount['category'] === 'error_change') ? 'selected' : ''; ?>>Erreur de rendu de monnaie</option>
+                                            <option value="error_input" <?php echo ($existingCount && $existingCount['category'] === 'error_input') ? 'selected' : ''; ?>>Erreur de saisie</option>
+                                            <option value="theft" <?php echo ($existingCount && $existingCount['category'] === 'theft') ? 'selected' : ''; ?>>Vol/Perte</option>
+                                            <option value="damage" <?php echo ($existingCount && $existingCount['category'] === 'damage') ? 'selected' : ''; ?>>Dégradation billet/pièce</option>
+                                            <option value="bank_error" <?php echo ($existingCount && $existingCount['category'] === 'bank_error') ? 'selected' : ''; ?>>Erreur bancaire</option>
+                                            <option value="other" <?php echo ($existingCount && $existingCount['category'] === 'other') ? 'selected' : ''; ?>>Autre</option>
                                         </select>
                                     </div>
                                     
@@ -836,7 +1050,6 @@ function formatDateTime($datetime) {
                                     </div>
                                 </div>
 
-                               
                                 <div style="margin-top: 2rem;">
                                     <button type="submit" class="btn-primary w-100 mb-3">
                                         <i data-lucide="save"></i>
@@ -860,14 +1073,28 @@ function formatDateTime($datetime) {
         </div>
     </div>
 
-   
     <div id="autoSaveIndicator" class="auto-save-indicator">
         <i data-lucide="check" style="width: 16px; height: 16px;"></i>
         Sauvegardé automatiquement
     </div>
 
-  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for Lucide to load
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            // Retry if Lucide isn't loaded yet
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }, 100);
+        }
+    });
+</script>
     
     <script>
         // Constants
@@ -881,13 +1108,7 @@ function formatDateTime($datetime) {
         // Initialize the application when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing cash counting app...');
-            
-            // Wait for all resources including scripts to load
-            if (document.readyState === 'complete') {
-                initializeApp();
-            } else {
-                window.addEventListener('load', initializeApp);
-            }
+            initializeApp();
         });
 
         function initializeApp() {
@@ -897,8 +1118,10 @@ function formatDateTime($datetime) {
                 calculateTotals();
                 setupAutoSave();
                 
-                // Initialize Lucide icons after everything is loaded
-                initializeLucideIcons();
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
                 
                 // Auto-hide alert messages
                 setTimeout(hideAlertMessage, 5000);
@@ -906,21 +1129,6 @@ function formatDateTime($datetime) {
                 console.log('Cash counting app initialized successfully');
             } catch (error) {
                 console.error('Error initializing app:', error);
-            }
-        }
-
-        function initializeLucideIcons() {
-            if (typeof lucide !== 'undefined' && lucide.createIcons) {
-                try {
-                    lucide.createIcons();
-                    console.log('Lucide icons initialized successfully');
-                } catch (error) {
-                    console.error('Error initializing Lucide icons:', error);
-                }
-            } else {
-                console.warn('Lucide not loaded, retrying...');
-                // Retry after a short delay
-                setTimeout(initializeLucideIcons, 500);
             }
         }
 
@@ -983,31 +1191,21 @@ function formatDateTime($datetime) {
                 }
             });
 
-            // Get other payment methods - with null checks
-            const cardsElement = document.getElementById('cards_amount');
-            const checksElement = document.getElementById('checks_amount');
-            const vouchersElement = document.getElementById('vouchers_amount');
-            
-            const cardsAmount = cardsElement ? parseFloat(cardsElement.value) || 0 : 0;
-            const checksAmount = checksElement ? parseFloat(checksElement.value) || 0 : 0;
-            const vouchersAmount = vouchersElement ? parseFloat(vouchersElement.value) || 0 : 0;
+            // Get other payment methods
+            const cardsAmount = parseFloat(document.getElementById('cards_amount').value) || 0;
+            const checksAmount = parseFloat(document.getElementById('checks_amount').value) || 0;
+            const vouchersAmount = parseFloat(document.getElementById('vouchers_amount').value) || 0;
 
             // Calculate totals
             const physicalTotal = cashTotal + cardsAmount + checksAmount + vouchersAmount;
             const difference = physicalTotal - EXPECTED_TOTAL;
 
             // Update display
-            const cashTotalElement = document.getElementById('cash-total');
-            const cardsTotalElement = document.getElementById('cards-total');
-            const checksTotalElement = document.getElementById('checks-total');
-            const vouchersTotalElement = document.getElementById('vouchers-total');
-            const physicalTotalElement = document.getElementById('physical-total');
-            
-            if (cashTotalElement) cashTotalElement.textContent = formatCurrency(cashTotal);
-            if (cardsTotalElement) cardsTotalElement.textContent = formatCurrency(cardsAmount);
-            if (checksTotalElement) checksTotalElement.textContent = formatCurrency(checksAmount);
-            if (vouchersTotalElement) vouchersTotalElement.textContent = formatCurrency(vouchersAmount);
-            if (physicalTotalElement) physicalTotalElement.textContent = formatCurrency(physicalTotal);
+            document.getElementById('cash-total').textContent = formatCurrency(cashTotal);
+            document.getElementById('cards-total').textContent = formatCurrency(cardsAmount);
+            document.getElementById('checks-total').textContent = formatCurrency(checksAmount);
+            document.getElementById('vouchers-total').textContent = formatCurrency(vouchersAmount);
+            document.getElementById('physical-total').textContent = formatCurrency(physicalTotal);
 
             // Update difference with styling
             const differenceElement = document.getElementById('difference');
@@ -1044,6 +1242,7 @@ function formatDateTime($datetime) {
                         warningText.className = 'warning-text';
                         warningText.style.fontSize = '0.8rem';
                         warningText.style.fontWeight = 'normal';
+                        warningText.style.color = '#dc2626';
                         warningText.textContent = 'Justification requise';
                         differenceElement.appendChild(warningText);
                     } else {
@@ -1052,16 +1251,6 @@ function formatDateTime($datetime) {
                     }
                 }
             }
-
-            console.log('Totals calculated:', {
-                cashTotal,
-                cardsAmount,
-                checksAmount,
-                vouchersAmount,
-                physicalTotal,
-                expectedTotal: EXPECTED_TOTAL,
-                difference
-            });
         }
 
         // Mark form as changed
@@ -1074,7 +1263,7 @@ function formatDateTime($datetime) {
             }
             
             // Set new auto-save timeout
-            autoSaveTimeout = setTimeout(autoSave, 2000); // Auto-save after 2 seconds of inactivity
+            autoSaveTimeout = setTimeout(autoSave, 2000);
         }
 
         // Setup auto-save functionality
@@ -1123,11 +1312,6 @@ function formatDateTime($datetime) {
             if (indicator) {
                 indicator.classList.add('show');
                 
-                // Re-initialize icons for the indicator
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-                
                 setTimeout(() => {
                     indicator.classList.remove('show');
                 }, 2000);
@@ -1158,10 +1342,7 @@ function formatDateTime($datetime) {
         const countingForm = document.getElementById('countingForm');
         if (countingForm) {
             countingForm.addEventListener('submit', function(e) {
-                const physicalTotalElement = document.getElementById('physical-total');
-                if (!physicalTotalElement) return;
-                
-                const physicalTotalText = physicalTotalElement.textContent;
+                const physicalTotalText = document.getElementById('physical-total').textContent;
                 const physicalTotal = parseFloat(physicalTotalText.replace(/[^\d]/g, '')) || 0;
                 const difference = physicalTotal - EXPECTED_TOTAL;
                 
@@ -1178,7 +1359,7 @@ function formatDateTime($datetime) {
                 }
                 
                 // Confirm significant differences
-                if (Math.abs(difference) > 2000) { // More than 2000 XAF
+                if (Math.abs(difference) > 2000) {
                     const confirmMessage = difference > 0 
                         ? `⚠️ ATTENTION: Surplus important de ${formatCurrency(Math.abs(difference))}.\n\nConfirmez-vous ce comptage ?`
                         : `⚠️ ATTENTION: Manque important de ${formatCurrency(Math.abs(difference))}.\n\nConfirmez-vous ce comptage ?`;
@@ -1217,21 +1398,12 @@ function formatDateTime($datetime) {
                 return 'Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir quitter ?';
             }
         });
-
-        // Handle online/offline status
-        window.addEventListener('online', function() {
-            console.log('Back online');
-        });
-
-        window.addEventListener('offline', function() {
-            console.log('Gone offline - auto-save disabled');
-        });
     </script>
 </body>
 </html>
 <?php
 } else {
-    header("Location: ../login.php");
+    header("Location: ../logout.php");
     exit();
 }
 ?>

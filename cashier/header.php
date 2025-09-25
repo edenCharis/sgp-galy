@@ -106,10 +106,7 @@ AppSettings::init($db);
                         <i data-lucide="user"></i>
                         Mon profil
                     </a>
-                    <a href="cash-count.php" class="dropdown-item">
-                        <i data-lucide="calculator"></i>
-                        Comptage caisse
-                    </a>
+                   
                     <a href="../logout.php" class="dropdown-item danger">
                         <i data-lucide="log-out"></i>
                         Déconnexion

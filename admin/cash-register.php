@@ -740,11 +740,7 @@ function calculateDifference($expected, $actual) {
         <span>Fermer</span>
     </button>
 
-    <a class="btn btn-sm btn-action btn-success" 
-           href="cash-count.php?id=<?php echo $register['id']; ?>">
-        <i data-lucide="calculator"></i>
-        <span>Comptage</span>
-                                </a>
+   
 
     <a class="btn btn-sm btn-action btn-view" 
            href="register_details.php?id=<?php echo $register['id']; ?>">
@@ -1282,7 +1278,7 @@ function calculateDifference($expected, $actual) {
 </html>
 <?php
 } else {
-    header("Location: ../login.php");
+    header("Location: ../logout.php");
     exit();
 }
 ?>

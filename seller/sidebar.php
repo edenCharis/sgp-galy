@@ -84,7 +84,19 @@ AppSettings::init($db);
 
       
 
-      
+        <div class="sidebar-group">
+            <div class="sidebar-menu">
+                <div class="sidebar-menu-item">
+                    <a href="../logout.php" class="sidebar-menu-link" data-page="logout">
+                        <i data-lucide="log-out" class="menu-icon"></i>
+                        <div class="menu-content">
+                            <div class="menu-title">Déconnexion</div>
+                            <div class="menu-description">Fermer session</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     
        
     </div>
