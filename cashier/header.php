@@ -1,4 +1,13 @@
 
+
+<?php
+
+
+
+require_once '../config/app_settings.php';
+AppSettings::init($db);
+
+?>
 <header class="header">
     <div class="header-content">
         <!-- Left Section -->
@@ -9,7 +18,8 @@
                      
             <div class="logo-section">
                 <div class="logo">
-                    <i data-lucide="cross"></i>
+                  
+                    <?php echo getAppIcon('icon-class'); ?>
                 </div>
                 <div class="page-info">
                     <h1 id="pageTitle">Caisse</h1>
@@ -76,7 +86,7 @@
                 <div class="avatar"><?php echo strtoupper($_SESSION["username"][0]);?></div>
                 <div class="user-info">
                     <div class="name"><?php echo $_SESSION["username"];?></div>
-                    <div class="role">CAISSIER</div>
+                    <div class="role"><?php echo $_SESSION["role"];?></div>
                 </div>
                 <i data-lucide="chevron-down"></i>
             </button>
@@ -87,7 +97,7 @@
                     <div class="avatar large"><?php echo strtoupper($_SESSION["username"][0]);?></div>
                     <div>
                         <div class="name"><?php echo $_SESSION["username"];?></div>
-                        <div class="role">Caissier</div>
+                        <div class="role"><?php echo $_SESSION["role"];?></div>
                         <div class="status">En service</div>
                     </div>
                 </div>
@@ -96,19 +106,7 @@
                         <i data-lucide="user"></i>
                         Mon profil
                     </a>
-                    <a href="cash-count.php" class="dropdown-item">
-                        <i data-lucide="calculator"></i>
-                        Comptage caisse
-                    </a>
-                    <a href="daily-report.php" class="dropdown-item">
-                        <i data-lucide="file-text"></i>
-                        Rapport du jour
-                    </a>
-                    <div class="dropdown-separator"></div>
-                    <a href="settings.php" class="dropdown-item">
-                        <i data-lucide="settings"></i>
-                        Paramètres
-                    </a>
+                   
                     <a href="../logout.php" class="dropdown-item danger">
                         <i data-lucide="log-out"></i>
                         Déconnexion

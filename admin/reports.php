@@ -86,13 +86,13 @@ function getLowStockReport($pdo, $threshold = 10) {
                 c.name as category,
                 p.stock,
 
-                p.supplier,
+                s.name as supplier_name,
                 CASE 
                     WHEN p.stock = 0 THEN 'Out of Stock'
                     WHEN p.stock <= 10 THEN 'Low Stock'
                     ELSE 'Normal'
                 END as status
-            FROM product p join category c on p.categoryId = c.id
+            FROM supplier s join  product p on s.id = p.supplierId join category c on p.categoryId = c.id
             WHERE p.stock <= ?
             ORDER BY p.stock ASC, p.name";
     

@@ -186,14 +186,15 @@ try {
     $users = $db->fetchAll($usersSQL, $params);
     if ($users === false) {
         $users = [];
-    }
+    };
 
     // Get user statistics
     $statsSQL = "SELECT 
                     COUNT(*) as total_users,
                     SUM(CASE WHEN role = 'ADMIN' THEN 1 ELSE 0 END) as admin_count,
                     SUM(CASE WHEN role = 'SELLER' THEN 1 ELSE 0 END) as seller_count,
-                    SUM(CASE WHEN role = 'CASHIER' THEN 1 ELSE 0 END) as cashier_count
+                    SUM(CASE WHEN role = 'CASHIER' THEN 1 ELSE 0 END) as cashier_count,
+                    SUM(CASE WHEN role = 'STOCK-MANAGER' THEN 1 ELSE 0 END) as stock_manager_count
                  FROM user";
     $stats = $db->fetch($statsSQL);
 
@@ -563,6 +564,7 @@ function getRoleText($role) {
                                     <option value="ADMIN" <?php echo $roleFilter == 'ADMIN' ? 'selected' : ''; ?>>Administrateur</option>
                                     <option value="SELLER" <?php echo $roleFilter == 'SELLER' ? 'selected' : ''; ?>>Vendeur</option>
                                     <option value="CASHIER" <?php echo $roleFilter == 'CASHIER' ? 'selected' : ''; ?>>Caissier</option>
+                                    <option value="STOCK-MANAGER" <?php echo $roleFilter == 'STOCK-MANAGER' ? 'selected' : ''; ?>>Gestionnaire de Stock</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -730,6 +732,7 @@ function getRoleText($role) {
                                 <option value="SELLER">Vendeur</option>
                                 <option value="CASHIER">Caissier</option>
                                 <option value="ADMIN">Administrateur</option>
+                                <option value="STOCK-MANAGER">Gestionnaire de Stock</option>
                             </select>
                         </div>
                     </div>

@@ -9,11 +9,18 @@ ini_set('display_errors', 1);
 try {
     // Include database connection
     include '../config/database.php';
+    define('DB_CONNECTION_INCLUDED', true);
+    
+    // Include app settings
+    require_once '../config/app_settings.php';
     
     // Check if database connection exists
     if (!isset($db)) {
         throw new Exception('Database connection not found');
     }
+
+    // Initialize app settings
+    AppSettings::init($db);
 
     $admin_id = $_SESSION['user_id'];
 
@@ -51,15 +58,16 @@ try {
     $totalClients = $clientsResult ? $clientsResult['total_clients'] : 0;
     $totalCashiers = $cashierResult ? $cashierResult['total_cashiers'] : 0;
 
-    // KPI 3: Inventory Overview
+    // KPI 3: Inventory Overview - Use low stock threshold from settings
+    $lowStockThreshold = AppSettings::getLowStockThreshold();
     $inventorySQL = "SELECT 
                         COUNT(*) as total_products,
-                        SUM(CASE WHEN stock > 10 THEN 1 ELSE 0 END) as in_stock,
-                        SUM(CASE WHEN stock > 0 AND stock <= 10 THEN 1 ELSE 0 END) as low_stock,
+                        SUM(CASE WHEN stock > ? THEN 1 ELSE 0 END) as in_stock,
+                        SUM(CASE WHEN stock > 0 AND stock <= ? THEN 1 ELSE 0 END) as low_stock,
                         SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) as out_of_stock
                      FROM product";
                      
-    $inventoryResult = $db->fetch($inventorySQL);
+    $inventoryResult = $db->fetch($inventorySQL, [$lowStockThreshold, $lowStockThreshold]);
     $inventoryData = $inventoryResult ? $inventoryResult : [
         'total_products' => 0,
         'in_stock' => 0,
@@ -141,14 +149,14 @@ try {
         $recentActivity = [];
     }
 
-    // Critical Alerts (Low Stock)
+    // Critical Alerts (Low Stock) - Use threshold from settings
     $criticalAlertsSQL = "SELECT p.name, stock, c.name as category
                          FROM product p join category c on p.categoryId = c.id
-                         WHERE stock <= 5
+                         WHERE stock <= ?
                          ORDER BY stock ASC
                          LIMIT 5";
     
-    $criticalAlerts = $db->fetchAll($criticalAlertsSQL);
+    $criticalAlerts = $db->fetchAll($criticalAlertsSQL, [max(1, $lowStockThreshold / 2)]);
     if ($criticalAlerts === false) {
         $criticalAlerts = [];
     }
@@ -192,11 +200,7 @@ try {
     echo $e->getMessage();
 }
 
-// Helper functions
-function formatCurrency($amount) {
-    return number_format($amount, 0) . ' XAF';
-}
-
+// Helper functions using app settings
 function formatPercentage($percentage) {
     return ($percentage >= 0 ? '+' : '') . number_format($percentage, 1) . '%';
 }
@@ -212,12 +216,12 @@ function timeAgo($datetime) {
 
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo appSetting('language', 'fr'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PharmaSys - Administration</title>
-     <link rel="stylesheet" href="../assets/css/base.css">
+    <title><?php echo getPageTitle('Administration'); ?></title>
+    <link rel="stylesheet" href="../assets/css/base.css">
     <link rel="stylesheet" href="../assets/css/header.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
@@ -226,6 +230,28 @@ function timeAgo($datetime) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- App CSS Variables -->
+    <?php echo AppSettings::getCSSVariables(); ?>
+    
+    <style>
+        /* Override default colors with app settings */
+        .stat-card.primary {
+            border-left-color: <?php echo AppSettings::getPrimaryColor(); ?>;
+        }
+        .stat-card.success {
+            border-left-color: <?php echo AppSettings::getSecondaryColor(); ?>;
+        }
+        .btn-primary, .quick-action-btn.primary {
+            background-color: <?php echo AppSettings::getPrimaryColor(); ?>;
+        }
+        .btn-secondary, .quick-action-btn.secondary {
+            background-color: <?php echo AppSettings::getSecondaryColor(); ?>;
+        }
+        .card-header {
+            background: linear-gradient(135deg, <?php echo AppSettings::getPrimaryColor(); ?>, <?php echo AppSettings::getSecondaryColor(); ?>);
+        }
+    </style>
 </head>
 <body>
     <div class="app-layout">
@@ -241,6 +267,21 @@ function timeAgo($datetime) {
             <!-- Content Area -->
             <main class="content-area">
                 <div class="dashboard-grid">
+                    <!-- Page Header with App Info -->
+                    <div class="dashboard-header" style="grid-column: 1 / -1; margin-bottom: 2rem;">
+                        <div class="app-brand">
+                            <?php echo getAppIcon('app-icon'); ?>
+                            <div class="brand-info">
+                                <h1 class="app-name"><?php echo htmlspecialchars(appName()); ?></h1>
+                                <p class="pharmacy-name"><?php echo htmlspecialchars(pharmacyName()); ?></p>
+                            </div>
+                        </div>
+                        <div class="dashboard-stats">
+                            <span class="stats-item">Seuil stock faible: <?php echo AppSettings::getLowStockThreshold(); ?></span>
+                            <span class="stats-item">Devise: <?php echo appSetting('currency'); ?></span>
+                        </div>
+                    </div>
+                    
                     <!-- Quick Stats Cards -->
                     <div class="stats-grid">
                         <div class="stat-card primary">
@@ -248,7 +289,7 @@ function timeAgo($datetime) {
                                 <i data-lucide="dollar-sign"></i>
                             </div>
                             <div class="stat-content">
-                                <div class="stat-value"><?php echo formatCurrency($totalRevenue); ?></div>
+                                <div class="stat-value"><?php echo formatAppCurrency($totalRevenue); ?></div>
                                 <div class="stat-label">Chiffre d'affaires</div>
                                 <div class="stat-change <?php echo $revenueGrowth >= 0 ? 'positive' : 'negative'; ?>">
                                     <i data-lucide="<?php echo $revenueGrowth >= 0 ? 'trending-up' : 'trending-down'; ?>"></i>
@@ -264,8 +305,6 @@ function timeAgo($datetime) {
                             <div class="stat-content">
                                 <div class="stat-value"><?php echo $totalSellers + $totalCashiers; ?></div>
                                 <div class="stat-label">Utilisateurs Total</div>
-                                
-                                
                             </div>
                         </div>
 
@@ -300,15 +339,12 @@ function timeAgo($datetime) {
 
                     <!-- Main Dashboard Content -->
                     <div class="dashboard-main">
-                        <!-- Revenue Chart -->
-                     
-
                         <!-- Recent Activity -->
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title text-white">
                                     <i data-lucide="activity"></i>
-                                    Activité récente
+                                    Activité récente - <?php echo htmlspecialchars(pharmacyName()); ?>
                                 </div>
                                 <a href="reports.php" class="text-link text-white">
                                     Voir les rapports
@@ -339,7 +375,7 @@ function timeAgo($datetime) {
                                                     </div>
                                                 </div>
                                                 <div class="activity-amount">
-                                                    <span class="amount"><?php echo formatCurrency($activity['total_amount']); ?></span>
+                                                    <span class="amount"><?php echo formatAppCurrency($activity['total_amount']); ?></span>
                                                     <span class="status completed">✓</span>
                                                 </div>
                                             </div>
@@ -370,6 +406,10 @@ function timeAgo($datetime) {
                                         <i data-lucide="package-plus"></i>
                                         Ajouter produit
                                     </a>
+                                    <a href="settings.php" class="quick-action-btn secondary">
+                                        <i data-lucide="settings"></i>
+                                        Paramètres
+                                    </a>
                                     <a href="reports.php" class="quick-action-btn secondary">
                                         <i data-lucide="file-text"></i>
                                         Générer rapport
@@ -399,7 +439,7 @@ function timeAgo($datetime) {
                                                 <div class="seller-info">
                                                     <div class="seller-name"><?php echo htmlspecialchars($seller['username']); ?></div>
                                                     <div class="seller-stats">
-                                                        <?php echo formatCurrency($seller['revenue']); ?> 
+                                                        <?php echo formatAppCurrency($seller['revenue']); ?> 
                                                         <span class="orders">• <?php echo $seller['orders']; ?> cmd</span>
                                                     </div>
                                                 </div>
@@ -415,7 +455,7 @@ function timeAgo($datetime) {
                             <div class="card-header">
                                 <div class="card-title text-white">
                                     <i data-lucide="alert-triangle"></i>
-                                    Alertes critiques
+                                    Alertes critiques (≤<?php echo AppSettings::getLowStockThreshold(); ?>)
                                 </div>
                             </div>
                             <div class="card-content">
@@ -442,6 +482,33 @@ function timeAgo($datetime) {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Pharmacy Info Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title text-white">
+                                    <?php echo getAppIcon(); ?>
+                                    Informations Pharmacie
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div class="pharmacy-info">
+                                    <?php $pharmacyInfo = AppSettings::getPharmacyInfo(); ?>
+                                    <div class="info-item">
+                                        <small class="text-muted">Licence:</small>
+                                        <div><?php echo htmlspecialchars($pharmacyInfo['license']); ?></div>
+                                    </div>
+                                    <div class="info-item">
+                                        <small class="text-muted">Téléphone:</small>
+                                        <div><?php echo htmlspecialchars($pharmacyInfo['phone']); ?></div>
+                                    </div>
+                                    <div class="info-item">
+                                        <small class="text-muted">Horaires:</small>
+                                        <div><?php echo htmlspecialchars($pharmacyInfo['working_hours']); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -452,6 +519,7 @@ function timeAgo($datetime) {
         // Chart data from PHP
         const chartData = <?php echo json_encode($chartData); ?>;
         const chartLabels = <?php echo json_encode($chartLabels); ?>;
+        const currency = '<?php echo appSetting("currency", "FCFA"); ?>';
 
         // Initialize the revenue chart
         function initRevenueChart() {
@@ -469,14 +537,14 @@ function timeAgo($datetime) {
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        label: 'Revenus (XAF)',
+                        label: 'Revenus (' + currency + ')',
                         data: chartData,
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderColor: '<?php echo AppSettings::getPrimaryColor(); ?>',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBackgroundColor: '<?php echo AppSettings::getPrimaryColor(); ?>',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
                         pointRadius: 5,
@@ -496,7 +564,7 @@ function timeAgo($datetime) {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return value.toLocaleString() + ' XAF';
+                                    return value.toLocaleString() + ' ' + currency;
                                 },
                                 color: '#6b7280'
                             },
@@ -557,6 +625,88 @@ function timeAgo($datetime) {
             window.location.reload();
         }, 600000);
     </script>
+
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-icon {
+            width: 3rem;
+            height: 3rem;
+            padding: 0.75rem;
+            background: <?php echo AppSettings::getPrimaryColor(); ?>;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .pharmacy-name {
+            color: #6b7280;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .dashboard-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stats-item {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .pharmacy-info .info-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .pharmacy-info .info-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .dashboard-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
 </body>
 </html>
 
